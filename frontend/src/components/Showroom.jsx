@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MapPin, Clock, MessageCircle, Navigation } from 'lucide-react';
+import Reveal from './Reveal.jsx';
 import { buildWhatsAppLink } from '../defaults.js';
 
 // Reads the first two clock times from free text such as "Mon - Sun: 10:00 AM - 9:00 PM".
@@ -44,10 +45,12 @@ export default function Showroom({ address, timings, whatsappNumber }) {
 
   return (
     <section id="visit" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
-      <h2 className="font-heading text-3xl font-black uppercase tracking-tight sm:text-5xl">Visit the showroom</h2>
+      <Reveal>
+        <h2 className="font-heading text-3xl font-black uppercase tracking-tight sm:text-5xl">Visit the showroom</h2>
+      </Reveal>
 
       <div className="mt-12 grid gap-8 lg:grid-cols-5">
-        <div className="space-y-6 lg:col-span-2">
+        <Reveal direction="left" className="space-y-6 lg:col-span-2">
           <div className="border border-white/10 bg-charcoal p-6 transition-colors duration-300 hover:border-accent">
             <div className="flex items-start gap-4">
               <MapPin className="mt-1 shrink-0 text-accent" size={24} aria-hidden="true" />
@@ -99,10 +102,11 @@ export default function Showroom({ address, timings, whatsappNumber }) {
               Message us
             </a>
           </div>
-        </div>
+        </Reveal>
 
         {/* Map slot. To embed Google Maps, replace this block with your iframe from Share > Embed a map. */}
-        <div className="carbon relative flex min-h-[20rem] items-center justify-center border border-white/10 lg:col-span-3">
+        <Reveal direction="right" delay={150} className="lg:col-span-3">
+        <div className="carbon relative flex h-full min-h-[20rem] items-center justify-center border border-white/10">
           <svg className="absolute inset-0 h-full w-full opacity-30" aria-hidden="true">
             <defs>
               <pattern id="streets" width="64" height="64" patternUnits="userSpaceOnUse">
@@ -119,6 +123,7 @@ export default function Showroom({ address, timings, whatsappNumber }) {
             <p className="mt-1 max-w-xs text-sm text-ash">Map embed slot. Use Get directions to open live navigation.</p>
           </div>
         </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -21,6 +21,23 @@ export default {
           '70%': { boxShadow: '0 0 0 18px rgb(var(--accent) / 0)' },
           '100%': { boxShadow: '0 0 0 0 rgb(var(--accent) / 0)' },
         },
+        fadeUp: {
+          '0%': { opacity: '0', transform: 'translateY(28px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        chase: {
+          '0%, 100%': { opacity: '0.12' },
+          '40%': { opacity: '1' },
+        },
         streak: {
           '0%': { transform: 'translateX(-120%)', opacity: '0' },
           '30%': { opacity: '1' },
@@ -30,6 +47,11 @@ export default {
       animation: {
         ring: 'ring 2s ease-out infinite',
         streak: 'streak 2.8s ease-in-out infinite',
+        'fade-up': 'fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'fade-in': 'fadeIn 1.2s ease-out both',
+        marquee: 'marquee 30s linear infinite',
+        float: 'float 6s ease-in-out infinite',
+        chase: 'chase 1.6s ease-in-out infinite',
       },
     },
   },

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Instagram, Youtube, Facebook, Loader2, Check, Phone } from 'lucide-react';
+import Reveal from './Reveal.jsx';
 import { SOCIALS } from '../defaults.js';
 
 const SOCIAL_ICONS = { Instagram, YouTube: Youtube, Facebook };
@@ -27,7 +28,7 @@ export default function Footer({ address, whatsappNumber }) {
 
   return (
     <footer id="contact" className="border-t border-white/10 bg-charcoal">
-      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-2">
+      <Reveal className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-2">
         <div>
           <h2 className="font-heading text-3xl font-black uppercase tracking-tight sm:text-4xl">Join the Inner Circle</h2>
           <p className="mt-3 max-w-md text-ash">New arrivals, ride-day offers and gear guides. No spam, unsubscribe any time.</p>
@@ -103,12 +104,15 @@ export default function Footer({ address, whatsappNumber }) {
             </ul>
           </div>
         </div>
-      </div>
+      </Reveal>
 
       <div className="border-t border-white/10">
-        <p className="mx-auto max-w-7xl px-5 py-6 text-xs text-ash sm:px-8">
-          &copy; {new Date().getFullYear()} Pit500, Pune. Always wear a certified helmet and ride safe.
-        </p>
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-ash sm:px-8">
+          <p>&copy; {new Date().getFullYear()} Pit500, Pune. Always wear a certified helmet and ride safe.</p>
+          <a href="/admin" className="font-semibold uppercase tracking-wide transition-colors duration-300 hover:text-accent">
+            Admin sign in
+          </a>
+        </div>
       </div>
     </footer>
   );

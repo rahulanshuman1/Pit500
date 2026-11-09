@@ -20,10 +20,10 @@ export default function HeroGraphic() {
         <polygon points="285,153 289,153 -40,480 -120,480" fill="#FF5722" opacity="0.9" />
         <polygon points="311,153 315,153 720,480 640,480" fill="#FF5722" opacity="0.9" />
         <g fill="#9CA3AF">
-          <polygon points="298.5,158 301.5,158 303,176 297,176" />
-          <polygon points="297,190 303,190 306,222 294,222" />
-          <polygon points="294.5,246 305.5,246 311,306 289,306" />
-          <polygon points="289,340 311,340 322,436 278,436" />
+          <polygon className="animate-chase" style={{ animationDelay: '0ms' }} points="298.5,158 301.5,158 303,176 297,176" />
+          <polygon className="animate-chase" style={{ animationDelay: '250ms' }} points="297,190 303,190 306,222 294,222" />
+          <polygon className="animate-chase" style={{ animationDelay: '500ms' }} points="294.5,246 305.5,246 311,306 289,306" />
+          <polygon className="animate-chase" style={{ animationDelay: '750ms' }} points="289,340 311,340 322,436 278,436" />
         </g>
       </svg>
       <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px overflow-hidden">
