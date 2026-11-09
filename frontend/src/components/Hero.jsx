@@ -1,7 +1,7 @@
 import { ArrowDown } from 'lucide-react';
 import HeroGraphic from './HeroGraphic.jsx';
 
-export default function Hero({ headline, subheadline }) {
+export default function Hero({ headline, subheadline, imageUrl }) {
   // "FUEL YOUR PASSION. PROTECT YOUR RIDE." renders one sentence per line, the last in the accent colour.
   const lines = (headline || '')
     .split(/(?<=[.!?])\s+/)
@@ -52,7 +52,7 @@ export default function Hero({ headline, subheadline }) {
         </div>
         <div style={{ animationDelay: '400ms' }} className="animate-fade-in">
           <div className="animate-float">
-            <HeroGraphic />
+            <HeroGraphic imageUrl={imageUrl} />
           </div>
         </div>
       </div>

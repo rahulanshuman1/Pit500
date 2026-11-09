@@ -1,6 +1,7 @@
 // Shown instantly on first paint and whenever the API is cold-starting or unreachable.
 export const DEFAULT_CONTENT = {
   heroHeadline: 'FUEL YOUR PASSION. PROTECT YOUR RIDE.',
+  heroImageUrl: '',
   heroSubheadline:
     'Certified helmets, race-grade apparel, touring luggage and workshop-proven accessories, curated in Pune and delivered across India.',
   storeAddress: 'Pit500, Baner Road, Baner, Pune, Maharashtra 411045',

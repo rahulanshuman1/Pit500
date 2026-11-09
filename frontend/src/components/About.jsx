@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import Reveal from './Reveal.jsx';
+import Photo from './Photo.jsx';
 import { ShieldCheck, Truck, Users } from 'lucide-react';
 
 const PILLARS = [
@@ -20,6 +22,7 @@ const PILLARS = [
 ];
 
 export default function About() {
+  const [showBanner, setShowBanner] = useState(true);
   return (
     <section id="about" className="border-y border-white/10 bg-charcoal">
       <div className="mx-auto grid max-w-7xl gap-14 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-5">
@@ -47,6 +50,15 @@ export default function About() {
           ))}
         </div>
       </div>
+
+      {showBanner && (
+        <Reveal className="mx-auto max-w-7xl px-5 pb-20 sm:px-8 sm:pb-28">
+          <div className="carbon relative aspect-[16/7] overflow-hidden border border-white/10">
+            <Photo src="/images/about.jpg" alt="Inside the Pit500 showroom in Pune" onFail={() => setShowBanner(false)} />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-asphalt/60 via-transparent to-transparent" />
+          </div>
+        </Reveal>
+      )}
     </section>
   );
 }

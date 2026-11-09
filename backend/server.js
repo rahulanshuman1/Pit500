@@ -99,6 +99,16 @@ function validateContent(body) {
     data[field] = trimmed;
   }
 
+  if (body.heroImageUrl !== undefined) {
+    if (!isString(body.heroImageUrl)) return { error: 'heroImageUrl must be text.' };
+    const img = body.heroImageUrl.trim();
+    if (img.length > 2048) return { error: 'heroImageUrl is too long.' };
+    if (img && !/^(https?:\/\/|\/)/i.test(img)) {
+      return { error: 'heroImageUrl must start with http://, https:// or /.' };
+    }
+    data.heroImageUrl = img;
+  }
+
   if (data.whatsappNumber !== undefined) {
     const digits = data.whatsappNumber.replace(/\D/g, '');
     if (digits && (digits.length < 10 || digits.length > 15)) {
@@ -138,6 +148,7 @@ function serializeContent(doc) {
   if (!doc) return defaultContent;
   return {
     heroHeadline: doc.heroHeadline || defaultContent.heroHeadline,
+    heroImageUrl: doc.heroImageUrl || '',
     heroSubheadline: doc.heroSubheadline ?? defaultContent.heroSubheadline,
     storeAddress: doc.storeAddress ?? defaultContent.storeAddress,
     storeTimings: doc.storeTimings ?? defaultContent.storeTimings,

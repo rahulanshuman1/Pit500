@@ -180,6 +180,8 @@ function PasswordCard({ token, onExpired }) {
 function validate(form) {
   const errors = {};
   if (!form.heroHeadline.trim()) errors.heroHeadline = 'Add a headline.';
+  const hero = form.heroImageUrl.trim();
+  if (hero && !/^(https?:\/\/|\/)/i.test(hero)) errors.heroImageUrl = 'Start the image link with https:// or /.';
   const digits = form.whatsappNumber.replace(/\D/g, '');
   if (digits.length < 10 || digits.length > 15) errors.whatsappNumber = 'Use 10 to 15 digits including country code, e.g. 919876543210.';
   if (!form.storeAddress.trim()) errors.storeAddress = 'Add the store address.';
@@ -308,6 +310,16 @@ function Dashboard({ token, onLogout }) {
               onChange={setField('heroSubheadline')}
               maxLength={400}
             />
+            <Field
+              id="heroImageUrl"
+              label="Hero image link"
+              type="url"
+              value={form.heroImageUrl}
+              onChange={setField('heroImageUrl')}
+              error={errors.heroImageUrl}
+              hint="Optional. Leave empty to use /images/hero.jpg from the site, or paste a full https:// link to an HD photo."
+              placeholder="https://..."
+            />
           </div>
         </section>
 
@@ -379,7 +391,7 @@ function Dashboard({ token, onLogout }) {
                   value={c.imagePlaceholderUrl}
                   onChange={setCategory(i, 'imagePlaceholderUrl')}
                   error={errors[`cat-${i}-img`]}
-                  hint="Optional. Leave empty to show the carbon-fibre placeholder."
+                  hint="Optional. Leave empty to use /images/<category-id>.jpg from the site."
                   placeholder="https://..."
                 />
               </fieldset>

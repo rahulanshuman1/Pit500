@@ -1,29 +1,9 @@
-import { useState } from 'react';
 import { HardHat, Shirt, Luggage, Wrench, ArrowUpRight } from 'lucide-react';
 import Reveal from './Reveal.jsx';
+import Photo from './Photo.jsx';
 import { buildWhatsAppLink } from '../defaults.js';
 
 const ICONS = [HardHat, Shirt, Luggage, Wrench];
-
-function CardImage({ url, Icon, title }) {
-  const [failed, setFailed] = useState(false);
-  if (url && !failed) {
-    return (
-      <img
-        src={url}
-        alt={title}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-      />
-    );
-  }
-  return (
-    <div className="carbon flex h-full w-full items-center justify-center transition-transform duration-500 group-hover:scale-110">
-      <Icon size={56} strokeWidth={1.25} className="text-ash transition-colors duration-300 group-hover:text-accent" aria-hidden="true" />
-    </div>
-  );
-}
 
 export default function Categories({ categories, whatsappNumber }) {
   return (
@@ -46,8 +26,18 @@ export default function Categories({ categories, whatsappNumber }) {
               rel="noopener noreferrer"
               className="group relative flex h-full flex-col overflow-hidden border border-white/10 bg-charcoal transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-accent"
             >
-              <div className="aspect-[4/3] overflow-hidden border-b border-white/10">
-                <CardImage url={c.imagePlaceholderUrl} Icon={Icon} title={c.title} />
+              <div className="relative aspect-[4/3] overflow-hidden border-b border-white/10">
+                <Photo
+                  src={c.imagePlaceholderUrl || `/images/${c.id}.jpg`}
+                  alt={c.title}
+                  className="group-hover:scale-110"
+                  fallback={
+                    <div className="carbon absolute inset-0 flex items-center justify-center">
+                      <Icon size={56} strokeWidth={1.25} className="text-ash transition-colors duration-300 group-hover:text-accent" aria-hidden="true" />
+                    </div>
+                  }
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent" />
               </div>
               <div className="flex flex-1 flex-col p-6">
                 <h3 className="font-heading text-xl font-extrabold uppercase leading-tight transition-colors duration-300 group-hover:text-accent">

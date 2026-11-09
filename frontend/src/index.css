@@ -64,3 +64,67 @@ footer[id] {
     transition-duration: 0.01ms !important;
   }
 }
+@keyframes splashBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ---------- Animated logo ---------- */
+.logo-ring {
+  stroke-dasharray: 75 100;
+  stroke-dashoffset: 75;
+  animation: logoRing 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+.logo-tick {
+  opacity: 0;
+  animation: logoFade 0.4s ease-out forwards;
+}
+.logo-needle {
+  transform-origin: 24px 24px;
+  transform-box: view-box;
+  animation:
+    needleSweep 1.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both,
+    needleIdle 3.4s ease-in-out 1.9s infinite;
+}
+a:hover .logo-needle {
+  animation: needleRev 0.9s cubic-bezier(0.3, 0.7, 0.2, 1) both, needleIdle 3.4s ease-in-out 0.9s infinite;
+}
+.logo-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: letterIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.logo-glow {
+  animation: logoGlow 3s ease-in-out 2s infinite;
+}
+.logo-shine {
+  background: linear-gradient(90deg, transparent, rgb(var(--accent)), transparent);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: logoShine 2.6s linear 1.6s infinite;
+}
+@keyframes logoRing { to { stroke-dashoffset: 0; } }
+@keyframes logoFade { to { opacity: 1; } }
+@keyframes needleSweep {
+  0% { transform: rotate(-135deg); }
+  55% { transform: rotate(120deg); }
+  100% { transform: rotate(42deg); }
+}
+@keyframes needleRev {
+  0% { transform: rotate(42deg); }
+  45% { transform: rotate(125deg); }
+  100% { transform: rotate(42deg); }
+}
+@keyframes needleIdle {
+  0%, 100% { transform: rotate(42deg); }
+  50% { transform: rotate(47deg); }
+}
+@keyframes letterIn {
+  from { opacity: 0; transform: translateY(14px) skewX(-12deg); }
+  to { opacity: 1; transform: translateY(0) skewX(0); }
+}
+@keyframes logoGlow {
+  0%, 100% { text-shadow: 0 0 0 rgb(var(--accent) / 0); }
+  50% { text-shadow: 0 0 14px rgb(var(--accent) / 0.75); }
+}
+@keyframes logoShine {
+  from { background-position: -100% 0; }
+  to { background-position: 200% 0; }
+}

@@ -38,6 +38,10 @@ export default {
           '0%, 100%': { opacity: '0.12' },
           '40%': { opacity: '1' },
         },
+        kenburns: {
+          '0%': { transform: 'scale(1)' },
+          '100%': { transform: 'scale(1.09)' },
+        },
         streak: {
           '0%': { transform: 'translateX(-120%)', opacity: '0' },
           '30%': { opacity: '1' },
@@ -49,6 +53,7 @@ export default {
         streak: 'streak 2.8s ease-in-out infinite',
         'fade-up': 'fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both',
         'fade-in': 'fadeIn 1.2s ease-out both',
+        kenburns: 'kenburns 18s ease-in-out infinite alternate',
         marquee: 'marquee 30s linear infinite',
         float: 'float 6s ease-in-out infinite',
         chase: 'chase 1.6s ease-in-out infinite',

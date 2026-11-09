@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Menu, X, MessageCircle, LogIn } from 'lucide-react';
+import Logo from './Logo.jsx';
 import { buildWhatsAppLink } from '../defaults.js';
 
 const LINKS = [
@@ -38,8 +39,8 @@ export default function Navbar({ whatsappNumber }) {
         }`}
         aria-label="Main"
       >
-        <a href="#top" className="font-heading text-2xl font-black uppercase tracking-tight text-white">
-          PIT<span className="text-accent">500</span>
+        <a href="#top" aria-label="Pit500 home" className="flex items-center">
+          <Logo />
         </a>
 
         <ul className="hidden items-center gap-9 md:flex">
