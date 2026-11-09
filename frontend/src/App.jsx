@@ -19,7 +19,7 @@ export default function App() {
         <Hero imageUrl={content.heroImageUrl} headline={content.heroHeadline} subheadline={content.heroSubheadline} />
         <Marquee categories={content.categories} />
         <Categories categories={content.categories} whatsappNumber={content.whatsappNumber} />
-        <About />
+        <About imageUrl={content.aboutImageUrl} />
         <Showroom
           address={content.storeAddress}
           timings={content.storeTimings}

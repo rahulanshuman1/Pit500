@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Loader2, Check, AlertTriangle, LogOut, ExternalLink, Lock } from 'lucide-react';
-import { fetchContent, loginAdmin, saveContent, changePassword, errorMessage } from '../api.js';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Loader2, Check, AlertTriangle, LogOut, ExternalLink, Lock, Upload, Trash2 } from 'lucide-react';
+import { fetchContent, loginAdmin, saveContent, changePassword, uploadImage, errorMessage } from '../api.js';
 import { DEFAULT_CONTENT } from '../defaults.js';
 
 const TOKEN_KEY = 'pit500_admin_token';
@@ -59,6 +59,133 @@ function Field({ id, label, value, onChange, error, hint, multiline = false, row
           {error}
         </p>
       )}
+    </div>
+  );
+}
+
+/* ---------------------------- Image field ---------------------------- */
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+
+// A link box plus an Upload button and drop zone. Uploading fills the link box with the hosted image.
+function ImageField({ id, label, value, onChange, error, hint, token, onExpired, placeholder = 'https://...' }) {
+  const inputRef = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [note, setNote] = useState({ type: '', text: '' });
+  const [dragging, setDragging] = useState(false);
+  const [previewBroken, setPreviewBroken] = useState(false);
+
+  useEffect(() => {
+    setPreviewBroken(false);
+  }, [value]);
+
+  const upload = async (file) => {
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) {
+      setNote({ type: 'error', text: 'Choose a JPG, PNG, WebP or AVIF image.' });
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setNote({ type: 'error', text: 'Image is larger than 8 MB. Choose a smaller file.' });
+      return;
+    }
+    setBusy(true);
+    setProgress(0);
+    setNote({ type: '', text: '' });
+    try {
+      const { url } = await uploadImage(token, file, setProgress);
+      onChange(url);
+      setNote({ type: 'ok', text: 'Uploaded. Click Publish Live Updates to show it on the site.' });
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        onExpired();
+        return;
+      }
+      setNote({ type: 'error', text: errorMessage(err, 'Upload failed. Try again.') });
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    if (!busy) upload(e.dataTransfer.files?.[0]);
+  };
+
+  return (
+    <div>
+      <Field id={id} label={label} type="url" value={value} onChange={onChange} error={error} hint={hint} placeholder={placeholder} />
+
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        className={`mt-3 flex flex-wrap items-center gap-4 border border-dashed p-3 transition-colors duration-300 ${
+          dragging ? 'border-accent bg-accent/10' : 'border-white/20'
+        }`}
+      >
+        {value && !previewBroken ? (
+          <img
+            src={value}
+            alt=""
+            onError={() => setPreviewBroken(true)}
+            className="h-20 w-28 border border-white/10 object-cover"
+          />
+        ) : (
+          <div className="carbon flex h-20 w-28 items-center justify-center border border-white/10 text-xs text-ash">No image</div>
+        )}
+
+        <div className="min-w-[12rem] flex-1">
+          <input
+            ref={inputRef}
+            id={`${id}-file`}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/avif"
+            className="sr-only"
+            onChange={(e) => upload(e.target.files?.[0])}
+            disabled={busy}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={busy}
+              className="inline-flex items-center gap-2 border-2 border-accent px-4 py-2 text-sm font-bold uppercase tracking-wide text-accent transition-all duration-300 hover:bg-accent hover:text-black disabled:opacity-60"
+            >
+              {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Upload size={16} aria-hidden="true" />}
+              {busy ? (progress >= 100 ? 'Processing' : `Uploading ${progress}%`) : 'Upload image'}
+            </button>
+            {value && !busy && (
+              <button
+                type="button"
+                onClick={() => {
+                  onChange('');
+                  setNote({ type: '', text: '' });
+                }}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm text-ash transition-colors duration-300 hover:text-red-400"
+              >
+                <Trash2 size={14} aria-hidden="true" /> Remove
+              </button>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-ash">Drop a file here or choose one. JPG, PNG, WebP or AVIF up to 8 MB. Saved as HD WebP.</p>
+          {busy && (
+            <div className="mt-2 h-1 w-full bg-white/10" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+              <div className="h-full bg-accent transition-[width] duration-200" style={{ width: `${progress}%` }} />
+            </div>
+          )}
+          {note.text && (
+            <p className={`mt-2 text-xs ${note.type === 'ok' ? 'text-emerald-400' : 'text-red-400'}`} role="status">
+              {note.text}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -182,6 +309,8 @@ function validate(form) {
   if (!form.heroHeadline.trim()) errors.heroHeadline = 'Add a headline.';
   const hero = form.heroImageUrl.trim();
   if (hero && !/^(https?:\/\/|\/)/i.test(hero)) errors.heroImageUrl = 'Start the image link with https:// or /.';
+  const about = (form.aboutImageUrl || '').trim();
+  if (about && !/^(https?:\/\/|\/)/i.test(about)) errors.aboutImageUrl = 'Start the image link with https:// or /.';
   const digits = form.whatsappNumber.replace(/\D/g, '');
   if (digits.length < 10 || digits.length > 15) errors.whatsappNumber = 'Use 10 to 15 digits including country code, e.g. 919876543210.';
   if (!form.storeAddress.trim()) errors.storeAddress = 'Add the store address.';
@@ -310,15 +439,25 @@ function Dashboard({ token, onLogout }) {
               onChange={setField('heroSubheadline')}
               maxLength={400}
             />
-            <Field
+            <ImageField
               id="heroImageUrl"
-              label="Hero image link"
-              type="url"
+              label="Hero image"
               value={form.heroImageUrl}
               onChange={setField('heroImageUrl')}
               error={errors.heroImageUrl}
-              hint="Optional. Leave empty to use /images/hero.jpg from the site, or paste a full https:// link to an HD photo."
-              placeholder="https://..."
+              hint="Optional. Upload a photo or paste a link. Empty uses /images/hero.jpg from the site."
+              token={token}
+              onExpired={onLogout}
+            />
+            <ImageField
+              id="aboutImageUrl"
+              label="About section banner image"
+              value={form.aboutImageUrl}
+              onChange={setField('aboutImageUrl')}
+              error={errors.aboutImageUrl}
+              hint="Optional wide photo of the showroom. Empty uses /images/about.jpg, or hides the banner if that file is missing."
+              token={token}
+              onExpired={onLogout}
             />
           </div>
         </section>
@@ -384,15 +523,15 @@ function Dashboard({ token, onLogout }) {
                   onChange={setCategory(i, 'description')}
                   maxLength={400}
                 />
-                <Field
+                <ImageField
                   id={`cat-${i}-img`}
-                  label="Image link"
-                  type="url"
+                  label="Category image"
                   value={c.imagePlaceholderUrl}
                   onChange={setCategory(i, 'imagePlaceholderUrl')}
                   error={errors[`cat-${i}-img`]}
-                  hint="Optional. Leave empty to use /images/<category-id>.jpg from the site."
-                  placeholder="https://..."
+                  hint="Optional. Upload a photo or paste a link."
+                  token={token}
+                  onExpired={onLogout}
                 />
               </fieldset>
             ))}

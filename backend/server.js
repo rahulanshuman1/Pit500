@@ -7,9 +7,12 @@ const helmet = require('helmet');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+const sharp = require('sharp');
 
 const Content = require('./models/Content');
 const Admin = require('./models/Admin');
+const Image = require('./models/Image');
 const auth = require('./middleware/auth');
 const defaultContent = require('./config/defaultContent');
 
@@ -99,14 +102,15 @@ function validateContent(body) {
     data[field] = trimmed;
   }
 
-  if (body.heroImageUrl !== undefined) {
-    if (!isString(body.heroImageUrl)) return { error: 'heroImageUrl must be text.' };
-    const img = body.heroImageUrl.trim();
-    if (img.length > 2048) return { error: 'heroImageUrl is too long.' };
+  for (const field of ['heroImageUrl', 'aboutImageUrl']) {
+    if (body[field] === undefined) continue;
+    if (!isString(body[field])) return { error: `${field} must be text.` };
+    const img = body[field].trim();
+    if (img.length > 2048) return { error: `${field} is too long.` };
     if (img && !/^(https?:\/\/|\/)/i.test(img)) {
-      return { error: 'heroImageUrl must start with http://, https:// or /.' };
+      return { error: `${field} must start with http://, https:// or /.` };
     }
-    data.heroImageUrl = img;
+    data[field] = img;
   }
 
   if (data.whatsappNumber !== undefined) {
@@ -149,6 +153,7 @@ function serializeContent(doc) {
   return {
     heroHeadline: doc.heroHeadline || defaultContent.heroHeadline,
     heroImageUrl: doc.heroImageUrl || '',
+    aboutImageUrl: doc.aboutImageUrl || '',
     heroSubheadline: doc.heroSubheadline ?? defaultContent.heroSubheadline,
     storeAddress: doc.storeAddress ?? defaultContent.storeAddress,
     storeTimings: doc.storeTimings ?? defaultContent.storeTimings,
@@ -244,6 +249,95 @@ app.put('/api/auth/password', auth, loginLimiter, async (req, res) => {
   } catch (err) {
     console.error('PUT /api/auth/password failed:', err);
     return res.status(500).json({ message: 'Could not update password. Try again.' });
+  }
+});
+
+/* ---------- Image upload (stored in MongoDB so it survives Render redeploys) ---------- */
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const ALLOWED_FORMATS = new Set(['jpeg', 'png', 'webp', 'avif']);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
+});
+
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many uploads. Try again in an hour.' },
+});
+
+function receiveImage(req, res, next) {
+  upload.single('image')(req, res, (err) => {
+    if (!err) return next();
+    const message =
+      err.code === 'LIMIT_FILE_SIZE'
+        ? 'Image is larger than 8 MB. Choose a smaller file.'
+        : 'Upload failed. Choose one JPG, PNG, WebP or AVIF image.';
+    return res.status(400).json({ message });
+  });
+}
+
+// Protected: upload one image. It is auto-rotated, limited to 1920px and saved as WebP.
+app.post('/api/upload', auth, uploadLimiter, receiveImage, async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'Choose an image to upload.' });
+
+  try {
+    const source = sharp(req.file.buffer, { limitInputPixels: 40000000 });
+    const meta = await source.metadata();
+    if (!ALLOWED_FORMATS.has(meta.format)) {
+      return res.status(400).json({ message: 'Only JPG, PNG, WebP or AVIF images are allowed.' });
+    }
+
+    const { data, info } = await source
+      .rotate()
+      .resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer({ resolveWithObject: true });
+
+    const doc = await Image.create({
+      data,
+      contentType: 'image/webp',
+      width: info.width,
+      height: info.height,
+      bytes: info.size,
+      originalName: String(req.file.originalname || '').slice(0, 200),
+    });
+
+    const base = (process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    return res.status(201).json({
+      url: `${base}/api/images/${doc._id}`,
+      width: info.width,
+      height: info.height,
+      bytes: info.size,
+    });
+  } catch (err) {
+    if (/Input|unsupported|pixel|corrupt|Invalid/i.test(err.message || '')) {
+      return res.status(400).json({ message: 'That file is not a valid image.' });
+    }
+    console.error('POST /api/upload failed:', err);
+    return res.status(500).json({ message: 'Could not save the image. Try again.' });
+  }
+});
+
+// Public: serve an uploaded image. Each upload gets a new id, so it can be cached forever.
+app.get('/api/images/:id', async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: 'Image not found.' });
+  try {
+    const img = await Image.findById(req.params.id);
+    if (!img) return res.status(404).json({ message: 'Image not found.' });
+    res.set({
+      'Content-Type': img.contentType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      // Helmet defaults to same-origin; the site lives on a different domain (Vercel).
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+    });
+    return res.send(img.data);
+  } catch (err) {
+    console.error('GET /api/images failed:', err);
+    return res.status(500).json({ message: 'Could not load the image.' });
   }
 });
 

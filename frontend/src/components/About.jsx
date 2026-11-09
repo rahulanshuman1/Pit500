@@ -21,7 +21,7 @@ const PILLARS = [
   },
 ];
 
-export default function About() {
+export default function About({ imageUrl }) {
   const [showBanner, setShowBanner] = useState(true);
   return (
     <section id="about" className="border-y border-white/10 bg-charcoal">
@@ -54,7 +54,7 @@ export default function About() {
       {showBanner && (
         <Reveal className="mx-auto max-w-7xl px-5 pb-20 sm:px-8 sm:pb-28">
           <div className="carbon relative aspect-[16/7] overflow-hidden border border-white/10">
-            <Photo src="/images/about.jpg" alt="Inside the Pit500 showroom in Pune" onFail={() => setShowBanner(false)} />
+            <Photo src={imageUrl || '/images/about.jpg'} alt="Inside the Pit500 showroom in Pune" onFail={() => setShowBanner(false)} />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-asphalt/60 via-transparent to-transparent" />
           </div>
         </Reveal>

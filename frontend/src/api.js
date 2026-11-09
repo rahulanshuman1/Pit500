@@ -24,3 +24,18 @@ export const errorMessage = (err, fallback = 'Something went wrong. Try again.')
   if (err?.request) return 'Cannot reach the server. Check your connection and try again.';
   return fallback;
 };
+
+// Sends one image as multipart form data. The server resizes it and returns a public link.
+export const uploadImage = (token, file, onProgress) => {
+  const form = new FormData();
+  form.append('image', file);
+  return api
+    .post('/api/upload', form, {
+      ...bearer(token),
+      timeout: 90000,
+      onUploadProgress: (e) => {
+        if (onProgress) onProgress(Math.round((e.loaded * 100) / (e.total || file.size || 1)));
+      },
+    })
+    .then((r) => r.data);
+};

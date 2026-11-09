@@ -2,6 +2,7 @@
 module.exports = {
   heroHeadline: 'FUEL YOUR PASSION. PROTECT YOUR RIDE.',
   heroImageUrl: '',
+  aboutImageUrl: '',
   heroSubheadline:
     'Certified helmets, race-grade apparel, touring luggage and workshop-proven accessories, curated in Pune and delivered across India.',
   storeAddress: 'Pit500, Baner Road, Baner, Pune, Maharashtra 411045',
