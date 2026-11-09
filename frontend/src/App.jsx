@@ -1,0 +1,28 @@
+import useContent from './useContent.js';
+import Navbar from './components/Navbar.jsx';
+import Hero from './components/Hero.jsx';
+import Categories from './components/Categories.jsx';
+import About from './components/About.jsx';
+import Showroom from './components/Showroom.jsx';
+import Footer from './components/Footer.jsx';
+
+export default function App() {
+  const { content } = useContent();
+
+  return (
+    <div className="min-h-screen bg-asphalt">
+      <Navbar whatsappNumber={content.whatsappNumber} />
+      <main>
+        <Hero headline={content.heroHeadline} subheadline={content.heroSubheadline} />
+        <Categories categories={content.categories} whatsappNumber={content.whatsappNumber} />
+        <About />
+        <Showroom
+          address={content.storeAddress}
+          timings={content.storeTimings}
+          whatsappNumber={content.whatsappNumber}
+        />
+      </main>
+      <Footer address={content.storeAddress} whatsappNumber={content.whatsappNumber} />
+    </div>
+  );
+}
